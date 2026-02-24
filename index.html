@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🧧 开工大吉 2026 🧧</title>
     <style>
+        /* 原有样式保持不变... */
         * {
             margin: 0;
             padding: 0;
@@ -255,6 +256,12 @@
     </style>
 </head>
 <body>
+    <!-- 音乐元素 -->
+    <audio id="backgroundMusic" preload="auto" loop>
+        <source src="harmony.mp3" type="audio/mpeg">
+        <!-- 如果浏览器不支持 MP3，可以添加其他格式 -->
+    </audio>
+
     <canvas id="fireworkCanvas"></canvas>
     
     <div class="container">
@@ -621,7 +628,52 @@
             }
         }
 
-        // ==================== ⭐ 按钮功能（带冷却） ====================
+        // ==================== ⭐ 音乐系统 ====================
+        // 1. 获取音乐元素
+        const music = document.getElementById('backgroundMusic');
+
+        // 2. 创建一个播放函数
+        function playMusic() {
+            // 尝试播放音乐
+            music.play().catch(error => {
+                console.warn("音乐播放被阻止，可能因用户未交互:", error);
+                // 可以在这里添加提示，例如弹出一个“请点击按钮播放音乐”
+            });
+        }
+
+        // 3. 为每个按钮添加音乐触发
+        // 这里使用了一个小技巧：让三个按钮都调用同一个函数
+        // 同时，为了防止重复播放，我们可以在播放后稍作延迟再允许再次播放
+        // （但通常 `loop` 属性已经处理了自动重播）
+
+        // ⭐ 重新定义 getLucky 函数
+        function getLucky() {
+            count++;
+            document.getElementById('clickCount').textContent = count;
+            
+            const random = Math.floor(Math.random() * luckyMessages.length);
+            const result = document.getElementById('result');
+            const title = document.getElementById('resultTitle');
+            const text = document.getElementById('resultText');
+            
+            title.textContent = luckyMessages[random].title;
+            text.textContent = luckyMessages[random].text + " 好运加持100%！";
+            result.style.display = 'block';
+            
+            const progress = document.getElementById('progress');
+            progress.style.width = Math.min(count * 10, 100) + '%';
+            
+            createEmojiRain();
+            createFirework();
+            
+            // ⭐ 播放音乐
+            playMusic();
+
+            // ⭐ 延迟一点，避免频繁触发（可选）
+            // setTimeout(() => {}, 100);
+        }
+
+        // ⭐ 重新定义 fireworkShow 函数
         function fireworkShow() {
             if (checkCooldown()) return;
             
@@ -642,10 +694,14 @@
             
             createEmojiRain();
             
+            // ⭐ 播放音乐
+            playMusic();
+            
             // ⭐ 设置冷却
             setCooldown(COOLDOWN_TIME.firework, 'fireworkBtn');
         }
 
+        // ⭐ 重新定义 grandFirework 函数
         function grandFirework() {
             if (checkCooldown()) return;
             
@@ -704,30 +760,14 @@
             text.textContent = "愿这绚烂的烟花照亮你2026年的每一天！事业如烟花般璀璨！";
             result.style.display = 'block';
             
+            // ⭐ 播放音乐
+            playMusic();
+            
             // ⭐ 设置较长冷却时间
             setCooldown(COOLDOWN_TIME.grand, 'grandBtn');
         }
 
-        function getLucky() {
-            count++;
-            document.getElementById('clickCount').textContent = count;
-            
-            const random = Math.floor(Math.random() * luckyMessages.length);
-            const result = document.getElementById('result');
-            const title = document.getElementById('resultTitle');
-            const text = document.getElementById('resultText');
-            
-            title.textContent = luckyMessages[random].title;
-            text.textContent = luckyMessages[random].text + " 好运加持100%！";
-            result.style.display = 'block';
-            
-            const progress = document.getElementById('progress');
-            progress.style.width = Math.min(count * 10, 100) + '%';
-            
-            createEmojiRain();
-            createFirework();
-        }
-
+        // ⭐ addWish 函数也加入音乐
         function addWish(card) {
             card.style.background = 'linear-gradient(45deg, #f093fb, #f5576c)';
             card.style.color = 'white';
@@ -742,6 +782,9 @@
             
             createEmojiRain();
             createFirework();
+            
+            // ⭐ 播放音乐
+            playMusic();
         }
 
         // ==================== ⭐ 点击交互（带限流） ====================
@@ -759,12 +802,19 @@
                     const msg = popupMessages[Math.floor(Math.random() * popupMessages.length)];
                     createPopup(msg, e.clientX, e.clientY);
                 }
+                
+                // ⭐ 在画布点击时也播放音乐
+                playMusic();
             }
         });
 
-        // ==================== 初始化 ====================
+        // ==================== ⭐ 初始化 ====================
         animate();
         
+        // ⭐ 页面加载完成后，尝试自动播放音乐（可选，但需用户交互）
+        // 由于现代浏览器策略，必须由用户操作触发，所以这里不自动播放
+        // 可以在第一个按钮点击时播放
+
         setTimeout(() => {
             createFirework();
         }, 500);
@@ -772,4 +822,3 @@
 </body>
 
 </html>
-
